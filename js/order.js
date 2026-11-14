@@ -266,11 +266,29 @@ function sellerFormattedPhone(phone) {
   return phone;
 }
 
-// Arma el modal de "elige tu vendedor" a partir de SELLERS (definido
-// en config.js, y sobreescrito en tiempo real por products-loader.js
-// con lo que haya en Supabase). Se llama JUSTO ANTES de abrir el modal
+// Arma el modal de "elige tu vendedora" a partir de SELLERS (config.js). Se llama JUSTO ANTES de abrir el modal
 // (ver openSellerModal) y de nuevo cada vez que el panel administrativo
 // guarda cambios en la lista de vendedores.
+// Tarjeta de una vendedora: su foto y abajo la franja verde de WhatsApp.
+function sellerCardInner(s) {
+  const foto = s.img
+    ? `<img src="${escapeSellerHtml(s.img)}?v=${NINOS_VERSION}" alt="${escapeSellerHtml(s.name)} · ${escapeSellerHtml(s.role || '')}" loading="lazy" width="480" height="480">`
+    : `<span class="seller-sinfoto"><b>${escapeSellerHtml(s.name)}</b>${s.role ? `<small>${escapeSellerHtml(s.role)}</small>` : ''}</span>`;
+  return `${foto}<span class="seller-phone">${SELLER_WA_ICON_SVG}${escapeSellerHtml(sellerFormattedPhone(sellerPhoneDigits(s.phone)))}</span>`;
+}
+
+// Seccion "Tus asesoras de ventas" (antes del pie de pagina): tocar una
+// tarjeta abre WhatsApp con esa vendedora, sin pedido.
+function renderFooterSellers() {
+  const wrap = document.getElementById('footerSellerList');
+  if (!wrap) return;
+  wrap.innerHTML = Object.keys(SELLERS).map(key => {
+    const s = SELLERS[key];
+    const msg = encodeURIComponent('Hola, vengo del catálogo infantil de ImpoHogar.');
+    return `<a class="seller-option" href="https://wa.me/${sellerPhoneDigits(s.phone)}?text=${msg}" target="_blank" rel="noopener" aria-label="Escribir a ${escapeSellerHtml(s.name)} por WhatsApp">${sellerCardInner(s)}</a>`;
+  }).join('');
+}
+
 function renderSellerModal() {
   const list = document.getElementById('sellerList');
   if (!list) return;
@@ -281,19 +299,13 @@ function renderSellerModal() {
   if (!Object.keys(lista).length && typeof SELLERS_RESPALDO !== 'undefined') lista = SELLERS_RESPALDO;
   const keys = Object.keys(lista).filter(k => lista[k] && lista[k].name && sellerPhoneDigits(lista[k].phone).length >= 8);
   if (!keys.length) {
-    list.innerHTML = '<p style="font-size:13px; color:var(--muted);">No hay vendedores configurados. Avísale a ImpoHogar para que los agregue desde el panel.</p>';
+    list.innerHTML = '<p style="font-size:13px; color:var(--muted);">No hay vendedoras configuradas.</p>';
     return;
   }
-  list.innerHTML = keys.map(key => {
-    const s = lista[key];
-    return `
-      <button type="button" class="seller-option" data-seller-key="${escapeSellerHtml(key)}" onclick="sendToSeller(this.dataset.sellerKey)">
-        <span class="seller-avatar">${escapeSellerHtml(sellerInitials(s.name))}</span>
-        <span class="seller-text"><b>${escapeSellerHtml(s.name)}</b><span>${escapeSellerHtml(sellerFormattedPhone(sellerPhoneDigits(s.phone)))}</span></span>
-        ${SELLER_WA_ICON_SVG}
-      </button>
-    `;
-  }).join('');
+  list.innerHTML = keys.map(key => `
+      <button type="button" class="seller-option" data-seller-key="${escapeSellerHtml(key)}" onclick="sendToSeller(this.dataset.sellerKey)" aria-label="Enviar pedido a ${escapeSellerHtml(lista[key].name)} por WhatsApp">
+        ${sellerCardInner(lista[key])}
+      </button>`).join('');
 }
 
 function openSellerModal() {

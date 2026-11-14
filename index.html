@@ -20,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Jost:wght@400;500;600&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=20261114a">
 <!-- Colores y tipografia del catalogo infantil: se carga AL FINAL -->
-<link rel="stylesheet" href="css/ninos.css?v=20261114b">
+<link rel="stylesheet" href="css/ninos.css?v=20261114c">
 </head>
 <body>
 <noscript>
@@ -146,6 +146,13 @@
   </div>
 </main>
 
+<!-- ============ VENDEDORAS ============ -->
+<section class="footer-sellers" id="vendedoras" aria-labelledby="vendedorasTitulo">
+  <h2 id="vendedorasTitulo">Tus asesoras de ventas</h2>
+  <p>Toca una tarjeta para escribirle por WhatsApp. Al generar tu pedido también podrás elegir a quién enviárselo.</p>
+  <div class="seller-list" id="footerSellerList"></div>
+</section>
+
 <!-- ============ PIE DE PAGINA ============ -->
 <footer class="social-footer">
   <div class="footer-inner">
@@ -246,7 +253,7 @@
 <div id="sellerModal" class="thanks-modal" onclick="if(event.target===this) closeSellerModal()">
   <div class="thanks-card seller-card">
     <div class="thanks-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-4 16-4.5-6.5z"/><path d="M11.5 13.5 20 4"/></svg></div>
-    <p class="thanks-text thanks-text-tight">Elige tu vendedor para enviarle tu pedido por WhatsApp</p>
+    <p class="thanks-text thanks-text-tight">Elige tu vendedora para enviarle tu pedido por WhatsApp</p>
     <p class="thanks-note">Se abrirá un chat de WhatsApp con el mensaje listo — solo adjunta ahí el Excel que se acaba de descargar en tu dispositivo.</p>
     <div class="seller-list" id="sellerList"></div>
     <button class="thanks-btn thanks-btn-ghost" type="button" onclick="closeSellerModal()">Omitir</button>
@@ -344,20 +351,20 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.12.3/JsBarcode.all.min.js"></script>
 
 <!-- El ORDEN de estos archivos importa: no los reordenes. -->
-<script defer src="js/config.js?v=20261114b"></script>
+<script defer src="js/config.js?v=20261114c"></script>
 <script defer src="js/data.js?v=20261114b"></script>
-<script defer src="js/products-loader.js?v=20261114b"></script>
+<script defer src="js/products-loader.js?v=20261114c"></script>
 <script defer src="js/utils.js?v=20261114b"></script>
 <script defer src="js/dupes.js?v=20261114b"></script>
 <script defer src="js/catalog.js?v=20261114b"></script>
 <script defer src="js/cart.js?v=20261114b"></script>
 <script defer src="js/theme.js?v=20261114b"></script>
-<script defer src="js/order.js?v=20261114b"></script>
+<script defer src="js/order.js?v=20261114c"></script>
 <script defer src="js/history.js?v=20261114b"></script>
 <script defer src="js/calculator.js?v=20261114b"></script>
 <script defer src="js/lightbox.js?v=20261114b"></script>
 <script defer src="js/inicio.js?v=20261114b"></script>
 <script defer src="js/feedback.js?v=20261114b"></script>
-<script defer src="js/main.js?v=20261114b"></script>
+<script defer src="js/main.js?v=20261114c"></script>
 </body>
 </html>

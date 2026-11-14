@@ -3,8 +3,8 @@
 // ============================================================
 //  Trae SOLO los productos de niños (genero = "Niños") de la tabla
 //  "productos" -- la misma del catalogo de perfumeria, con el stock
-//  que sincroniza Interakzion -- y la lista de vendedores de la tabla
-//  "ajustes_catalogo". Arma window.PRODUCTS y window.STOCK, llama a
+//  que sincroniza Interakzion. Las vendedoras estan fijas en config.js.
+//  Arma window.PRODUCTS y window.STOCK, llama a
 //  buildDerivedData() y avisa con el evento "productos:listos".
 //  Si algo falla dispara "productos:error".
 // ============================================================
@@ -35,25 +35,9 @@ async function fetchProductosNinos() {
   return resp.json();
 }
 
-// Solo se usa la lista de vendedores. Si falla, quedan los de respaldo.
-async function fetchVendedores() {
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/ajustes_catalogo?select=clave,valor&clave=eq.vendedores`, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
-    });
-    if (!resp.ok) return;
-    const rows = await resp.json();
-    rows.forEach(row => {
-      if (row.clave === 'vendedores' && row.valor && typeof row.valor === 'object' && Object.keys(row.valor).length) {
-        SELLERS = row.valor;
-      }
-    });
-  } catch (err) { /* sigue con los vendedores de respaldo */ }
-}
-
 async function loadProductsFromSupabase() {
   try {
-    const [rows] = await Promise.all([fetchProductosNinos(), fetchVendedores()]);
+    const rows = await fetchProductosNinos();
     window.PRODUCTS = rows.filter(row => !row.eliminado_en).map(mapSupabaseRow);
     window.STOCK = {};
     window.PRODUCTS.forEach(p => { STOCK[p.code] = parseInt(p.stock) || 0; });

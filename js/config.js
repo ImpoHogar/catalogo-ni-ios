@@ -29,7 +29,7 @@ const IMG_BASE = "https://impohogar.github.io/Catalogo-Perfumer-a-Web/img/";
 const IMG_VERSION = "20261026";
 
 // Version de los archivos propios de este catalogo (iconos de categoria).
-const NINOS_VERSION = "20261114";
+const NINOS_VERSION = "20261114c";
 
 // Valor que identifica a los productos de niños en la tabla productos.
 const GENERO_NINOS = "Niños";
@@ -48,13 +48,15 @@ const ORDER_HISTORY_LIMIT = 20;
 // Con fotos publicadas: habilita el ZIP de fotos del pedido.
 const HAS_PHOTOS = true;
 
-// Vendedores: igual que en perfumeria, la lista real viene de Supabase
-// (tabla ajustes_catalogo, clave "vendedores", editable desde el panel
-// administrativo del catalogo de perfumeria). Esto es solo el respaldo
-// si no se logra traer.
+// Vendedoras de este catalogo (las mismas del catalogo de bodega /
+// Nevada). "img" es la tarjeta con su foto (img/vendedores/). Al
+// tocarla se abre WhatsApp con ese numero. Para agregar o quitar una,
+// solo hay que editar esta lista y subir su foto.
 const SELLERS_RESPALDO = {
-  roy: { name: 'Roy Chacón', phone: '50687203737' },
-  pedro: { name: 'Pedro Alemán', phone: '50672349212' }
+  ingrid:   { name: 'Ingrid Mora G.',     role: 'Asesora de ventas', phone: '50686052020', img: 'img/vendedores/ingrid.webp' },
+  jennifer: { name: 'Jennifer Rivera M.', role: 'Agente de ventas',  phone: '50684700099', img: 'img/vendedores/jennifer.webp' },
+  lohana:   { name: 'Lohana Mora',        role: 'Agente de ventas',  phone: '50670519682', img: 'img/vendedores/lohana.webp' },
+  nicole:   { name: 'Nicole Díaz C.',     role: 'Agente de ventas',  phone: '50684732332', img: 'img/vendedores/nicole.webp' }
 };
 let SELLERS = { ...SELLERS_RESPALDO };
 

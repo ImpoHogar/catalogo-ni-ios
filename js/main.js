@@ -114,6 +114,7 @@ function initCatalogUI() {
     renderBrandMarquee();
     renderHeroNuevos();
     renderKidsHero();
+    renderFooterSellers();
     document.getElementById('search').addEventListener('input', () => applyFilters());
     document.getElementById('brandFilter').addEventListener('change', () => applyFilters());
     document.getElementById('loadMoreBtn').addEventListener('click', () => renderPage(false));

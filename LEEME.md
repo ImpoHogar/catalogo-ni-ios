@@ -25,7 +25,10 @@ panel administrativo del catálogo de perfumería con género **Niños**.
 
 ## Pedidos y vendedores
 
-- Los vendedores son los mismos de perfumería (panel → Ajustes).
+- Las vendedoras son las del catálogo de bodega (Nevada): Ingrid, Jennifer,
+  Lohana y Nicole, con su foto (`img/vendedores/`). Se cambian en
+  `js/config.js` (lista `SELLERS_RESPALDO`). Salen al enviar el pedido y en
+  la sección "Tus asesoras de ventas" antes del pie de página.
 - Cada pedido se guarda en la misma tabla `pedidos` (se ve en el panel →
   Pedidos). El Excel se llama `Pedido_Infantil_...xlsx` y el mensaje de
   WhatsApp dice "...este es mi pedido del catálogo infantil".

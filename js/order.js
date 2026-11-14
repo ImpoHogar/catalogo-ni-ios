@@ -1,0 +1,322 @@
+// ============================================================
+//  GENERACION DEL PEDIDO
+// ============================================================
+//  Excel del pedido, ZIP de fotos, datos del cliente y envio por
+//  WhatsApp al vendedor.
+// ============================================================
+
+let currentCustomer = { name: '', phone: '' };
+
+let lastOrderSummary = { name: '', phone: '', totalProducts: 0, totalUnits: 0 };
+
+let pendingPhotosZip = null;
+
+// Guarda el pedido en Supabase para los reportes (quién pidió qué y
+// cuándo). Se guarda tal cual el cliente escribió su nombre/teléfono en
+// el modal -- el catálogo NO consulta ni muestra la lista de otros
+// clientes, para que nadie pueda ver quiénes son los demás clientes de
+// ImpoHogar. Ver SUPABASE_URL / SUPABASE_ANON_KEY en config.js.
+async function saveOrderToDatabase(customer, items, summary) {
+  if (typeof SUPABASE_URL === 'undefined' || !SUPABASE_URL) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify([{
+        cliente_nombre: customer.name,
+        cliente_telefono: customer.phone,
+        items: items.map(it => ({ code: it.code, name: it.name, brand: it.brand, qty: it.qty })),
+        total_lineas: summary.totalProducts,
+        total_unidades: summary.totalUnits
+      }])
+    });
+  } catch (err) {
+    // Nunca debe romper el flujo del pedido del cliente: si esto falla,
+    // el Excel/ZIP igual se genera y descarga con normalidad.
+    console.error('No se pudo guardar el pedido en el reporte', err);
+  }
+}
+
+function openCustomerModal() {
+  const ids = Object.keys(qtyMap);
+  if (ids.length === 0) {
+    setStatus('Selecciona al menos un producto.', true);
+    return;
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem('impohogar_customer') || '{}');
+    document.getElementById('custName').value = saved.name || '';
+    document.getElementById('custPhone').value = saved.phone || '';
+  } catch (err) {}
+  document.getElementById('custError').textContent = '';
+  document.getElementById('customerModal').classList.add('open');
+}
+
+function closeCustomerModal() {
+  document.getElementById('customerModal').classList.remove('open');
+}
+
+function confirmCustomerInfo() {
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  if (!name || !phone) {
+    document.getElementById('custError').textContent = 'Por favor completa tu nombre y teléfono.';
+    return;
+  }
+  currentCustomer = { name, phone };
+  try {
+    localStorage.setItem('impohogar_customer', JSON.stringify(currentCustomer));
+  } catch (err) {}
+  closeCustomerModal();
+  generateExcel();
+}
+
+async function generateExcel() {
+  try {
+    if (typeof ExcelJS === 'undefined') {
+      setStatus('Error: librería Excel no disponible.', true);
+      return;
+    }
+    const ids = Object.keys(qtyMap);
+    if (ids.length === 0) {
+      setStatus('Selecciona al menos un producto.', true);
+      return;
+    }
+    setStatus('Generando tu pedido...', false);
+
+    const customerName = (currentCustomer.name || '').trim();
+    const customerPhone = (currentCustomer.phone || '').trim();
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Pedido');
+
+    sheet.getColumn(1).width = 20;
+    sheet.getColumn(2).width = 50;
+    sheet.getColumn(3).width = 20;
+
+    const headerRow = sheet.addRow(['Codigo de barras', 'Descripcion', 'Cantidad']);
+    headerRow.font = { bold: true };
+
+    const historyItems = [];
+    const photoItems = [];
+
+    ids.forEach(id => {
+      const p = PRODUCTS_BY_ID[id];
+      historyItems.push({ code: p.code, name: p.name, brand: p.brand, qty: qtyMap[id] });
+      sheet.addRow([p.code, p.name, qtyMap[id]]);
+      if (p.img) {
+        photoItems.push(p);
+      }
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+    const fileTag = customerName ? `_${sanitizeFilename(customerName)}` : '';
+    a.href = url;
+    a.download = `Pedido_Infantil${fileTag}_${today}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setStatus('✓ Excel descargado.', false);
+    saveOrderToHistory(customerName, customerPhone, historyItems);
+    lastOrderSummary = {
+      name: customerName,
+      phone: customerPhone,
+      totalProducts: historyItems.length,
+      totalUnits: historyItems.reduce((sum, it) => sum + it.qty, 0)
+    };
+
+    // Guarda el pedido en la base de datos para los reportes (Supabase).
+    // No se espera su resultado: si falla o hay mala conexion, el pedido
+    // del cliente (Excel/ZIP) se genera y descarga igual, sin verse afectado.
+    saveOrderToDatabase(currentCustomer, historyItems, lastOrderSummary);
+
+    // Aviso a Google Analytics de que se genero un pedido, sin mandar
+    // ningun dato personal del cliente (solo cantidades).
+    if (typeof gtag === 'function') {
+      gtag('event', 'generar_pedido', {
+        catalogo: 'infantil',
+        cantidad_productos: lastOrderSummary.totalProducts,
+        cantidad_unidades: lastOrderSummary.totalUnits
+      });
+    }
+
+    clearCart();
+
+    if (photoItems.length > 0) {
+      await prepareOrderPhotosZip(photoItems, customerName, today, fileTag);
+    } else {
+      pendingPhotosZip = null;
+    }
+
+    showThankYouModal();
+  } catch (err) {
+    console.error(err);
+    setStatus('No se pudo generar el pedido. Intenta de nuevo.', true);
+  }
+}
+
+async function webpToJpegBlob(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('No se pudo descargar ' + url);
+  const blob = await resp.blob();
+  const bitmap = await createImageBitmap(blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0);
+  return await new Promise((resolve, reject) => {
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob fallo')), 'image/jpeg', 0.85);
+  });
+}
+
+async function prepareOrderPhotosZip(photoItems, customerName, today, fileTag) {
+  try {
+    if (typeof JSZip === 'undefined') { pendingPhotosZip = null; return; }
+    const zip = new JSZip();
+    await Promise.all(photoItems.map(async p => {
+      try {
+        const jpegBlob = await webpToJpegBlob(`${IMG_BASE}p${p.id}.webp?v=${IMG_VERSION}`);
+        const safeName = sanitizeFilename(`${p.brand}_${p.name}`);
+        zip.file(`${safeName}_${p.code}.jpg`, jpegBlob);
+      } catch (e) {
+        console.error('No se pudo incluir la foto de', p.code, e);
+      }
+    }));
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    pendingPhotosZip = { blob: zipBlob, filename: `Fotos_Pedido_Infantil${fileTag}_${today}.zip` };
+  } catch (err) {
+    console.error('No se pudo generar el zip de fotos', err);
+    pendingPhotosZip = null;
+  }
+}
+
+function downloadPendingPhotosZip() {
+  if (!pendingPhotosZip) return;
+  const zipUrl = URL.createObjectURL(pendingPhotosZip.blob);
+  const zipLink = document.createElement('a');
+  zipLink.href = zipUrl;
+  zipLink.download = pendingPhotosZip.filename;
+  document.body.appendChild(zipLink);
+  zipLink.click();
+  document.body.removeChild(zipLink);
+  URL.revokeObjectURL(zipUrl);
+}
+
+function showPhotosNoticeModal() {
+  document.getElementById('photosNoticeModal').classList.add('open');
+}
+
+function hidePhotosNoticeModal() {
+  document.getElementById('photosNoticeModal').classList.remove('open');
+  openSellerModal();
+}
+
+function showThankYouModal() {
+  closeOrderReview();
+  document.getElementById('thanksModal').classList.add('open');
+}
+
+function hideThankYouModal() {
+  document.getElementById('thanksModal').classList.remove('open');
+  if (pendingPhotosZip) {
+    showPhotosNoticeModal();
+  } else {
+    openSellerModal();
+  }
+}
+
+// Icono de WhatsApp reutilizado para cada vendedor del modal.
+const SELLER_WA_ICON_SVG = '<svg class="seller-wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.4A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-.2-.1-1.1-.4-2-1.3-.7-.7-1.2-1.5-1.4-1.7-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2s.8 2.4 1 2.5c.1.2 1.8 2.8 4.4 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3z"/></svg>';
+
+// SEGURIDAD: los vendedores vienen de la base de datos; todo lo que se
+// muestra se limpia y el telefono se deja solo con numeros.
+function escapeSellerHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function sellerPhoneDigits(phone) {
+  return String(phone || '').replace(/\D/g, '').slice(0, 15);
+}
+
+function sellerInitials(name) {
+  return (name || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+}
+
+function sellerFormattedPhone(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  const local = digits.length > 8 ? digits.slice(-8) : digits;
+  const cc = digits.length > 8 ? digits.slice(0, digits.length - 8) : '';
+  if (local.length === 8) {
+    return `${cc ? '(' + cc + ') ' : ''}${local.slice(0, 4)}-${local.slice(4)}`;
+  }
+  return phone;
+}
+
+// Arma el modal de "elige tu vendedor" a partir de SELLERS (definido
+// en config.js, y sobreescrito en tiempo real por products-loader.js
+// con lo que haya en Supabase). Se llama JUSTO ANTES de abrir el modal
+// (ver openSellerModal) y de nuevo cada vez que el panel administrativo
+// guarda cambios en la lista de vendedores.
+function renderSellerModal() {
+  const list = document.getElementById('sellerList');
+  if (!list) return;
+  // Si por lo que sea la lista de Supabase llega vacia o rota, se usan
+  // los vendedores de respaldo de config.js: el cliente nunca se queda
+  // sin a quien mandarle el pedido.
+  let lista = (typeof SELLERS !== 'undefined' && SELLERS && typeof SELLERS === 'object') ? SELLERS : {};
+  if (!Object.keys(lista).length && typeof SELLERS_RESPALDO !== 'undefined') lista = SELLERS_RESPALDO;
+  const keys = Object.keys(lista).filter(k => lista[k] && lista[k].name && sellerPhoneDigits(lista[k].phone).length >= 8);
+  if (!keys.length) {
+    list.innerHTML = '<p style="font-size:13px; color:var(--muted);">No hay vendedores configurados. Avísale a ImpoHogar para que los agregue desde el panel.</p>';
+    return;
+  }
+  list.innerHTML = keys.map(key => {
+    const s = lista[key];
+    return `
+      <button type="button" class="seller-option" data-seller-key="${escapeSellerHtml(key)}" onclick="sendToSeller(this.dataset.sellerKey)">
+        <span class="seller-avatar">${escapeSellerHtml(sellerInitials(s.name))}</span>
+        <span class="seller-text"><b>${escapeSellerHtml(s.name)}</b><span>${escapeSellerHtml(sellerFormattedPhone(sellerPhoneDigits(s.phone)))}</span></span>
+        ${SELLER_WA_ICON_SVG}
+      </button>
+    `;
+  }).join('');
+}
+
+function openSellerModal() {
+  // Se dibuja SIEMPRE antes de abrir: antes solo se dibujaba cuando el
+  // panel administrativo guardaba vendedores, asi que al cliente le
+  // salia la ventana vacia.
+  renderSellerModal();
+  document.getElementById('sellerModal').classList.add('open');
+}
+
+function closeSellerModal() {
+  document.getElementById('sellerModal').classList.remove('open');
+}
+
+function sendToSeller(key) {
+  let lista = (typeof SELLERS !== 'undefined' && SELLERS && Object.keys(SELLERS).length) ? SELLERS : (typeof SELLERS_RESPALDO !== 'undefined' ? SELLERS_RESPALDO : {});
+  const seller = Object.prototype.hasOwnProperty.call(lista, key) ? lista[key] : null;
+  if (!seller) return;
+  const phone = sellerPhoneDigits(seller.phone);
+  if (phone.length < 8) return;
+  const s = lastOrderSummary;
+  const message = `Buenas, mi nombre es ${s.name || ''}, este es mi pedido del catálogo infantil.`;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank', 'noopener');
+  closeSellerModal();
+}

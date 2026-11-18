@@ -8,6 +8,8 @@
 //  Marvel, MGA, PJ Masks) y los Grandeur Tubbees que quedaban por
 //  debajo de 4.500 van a 4.500 fijo. Los que pasan de 4.500 se quedan
 //  con su costo + 30%.
+//  Estuches: los que quedaban por debajo de 7.500 van a 7.500 fijo; los
+//  que pasan de 7.500 se quedan con su costo + 30%.
 //  Costos tomados de Interakzion perfumeria (tabla01, campo PCOSTO)
 //  el 18/11/2026. Aqui solo se publica el PRECIO final: el costo no
 //  aparece en ninguna parte del catalogo.
@@ -29,13 +31,13 @@ const PRECIOS = {
   "847610038746": 700,   // CREMA MATTEL 118ML BARBIE SURTIDOS DL24
   "847610040589": 1000,   // CREMA MGA 270 ML MY LITTELE PONY DL24
   "847610045195": 700,   // CREMA MGA LOL
-  "7453130921302": 1500,   // ESTUCHE CARS 3 EN 1 EDT 2P
+  "7453130921302": 7500,   // ESTUCHE CARS 3 EN 1 EDT 2P
   "8697659233624": 8150,   // ESTUCHE DC BATMAN  KIDS
-  "7453130921388": 1500,   // ESTUCHE INSIDE OUT EDT 2P
-  "7453130921326": 1500,   // ESTUCHE LOL SURPRISE  EDT 2P
-  "7453130921142": 1500,   // ESTUCHE MINIE MOUSE 3 EN 1 EDT 2P
-  "7453130920411": 1500,   // ESTUCHE MOANA EDT 2PZAZA
-  "7453130921364": 1500,   // ESTUCHE MY LITTLE PONY 3 EN 1 EDT 2P
+  "7453130921388": 7500,   // ESTUCHE INSIDE OUT EDT 2P
+  "7453130921326": 7500,   // ESTUCHE LOL SURPRISE  EDT 2P
+  "7453130921142": 7500,   // ESTUCHE MINIE MOUSE 3 EN 1 EDT 2P
+  "7453130920411": 7500,   // ESTUCHE MOANA EDT 2PZAZA
+  "7453130921364": 7500,   // ESTUCHE MY LITTLE PONY 3 EN 1 EDT 2P
   "663350095197": 4500,   // DISNEY STITCH ANGEL EDT 100ML
   "663350094138": 4500,   // DISNEY STITCH AZUL EDT 100ML
   "6290360599724": 3600,   // Lattafa Happy Brush 75ML  Kids

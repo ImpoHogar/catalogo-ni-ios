@@ -30,7 +30,7 @@ async function saveOrderToDatabase(customer, items, summary) {
       body: JSON.stringify([{
         cliente_nombre: customer.name,
         cliente_telefono: customer.phone,
-        items: items.map(it => ({ code: it.code, name: it.name, brand: it.brand, qty: it.qty })),
+        items: items.map(it => ({ code: it.code, name: it.name, brand: it.brand, qty: it.qty, precio: it.precio || null })),
         total_lineas: summary.totalProducts,
         total_unidades: summary.totalUnits
       }])
@@ -97,22 +97,36 @@ async function generateExcel() {
 
     sheet.getColumn(1).width = 20;
     sheet.getColumn(2).width = 50;
-    sheet.getColumn(3).width = 20;
+    sheet.getColumn(3).width = 12;
+    sheet.getColumn(4).width = 16;
+    sheet.getColumn(5).width = 16;
 
-    const headerRow = sheet.addRow(['Codigo de barras', 'Descripcion', 'Cantidad']);
+    const headerRow = sheet.addRow(['Codigo de barras', 'Descripcion', 'Cantidad', 'Precio unitario', 'Subtotal']);
     headerRow.font = { bold: true };
+    const FORMATO_COLONES = '"₡"#,##0';
+    let totalPedido = 0;
 
     const historyItems = [];
     const photoItems = [];
 
     ids.forEach(id => {
       const p = PRODUCTS_BY_ID[id];
-      historyItems.push({ code: p.code, name: p.name, brand: p.brand, qty: qtyMap[id] });
-      sheet.addRow([p.code, p.name, qtyMap[id]]);
+      const precio = precioDe(p);
+      const subtotal = precio ? precio * qtyMap[id] : null;
+      if (subtotal) totalPedido += subtotal;
+      historyItems.push({ code: p.code, name: p.name, brand: p.brand, qty: qtyMap[id], precio: precio });
+      const fila = sheet.addRow([p.code, p.name, qtyMap[id], precio || 'Consultar', subtotal || '']);
+      fila.getCell(4).numFmt = FORMATO_COLONES;
+      fila.getCell(5).numFmt = FORMATO_COLONES;
       if (p.img) {
         photoItems.push(p);
       }
     });
+
+    sheet.addRow([]);
+    const filaTotal = sheet.addRow(['', 'TOTAL', '', '', totalPedido]);
+    filaTotal.font = { bold: true };
+    filaTotal.getCell(5).numFmt = FORMATO_COLONES;
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -133,7 +147,8 @@ async function generateExcel() {
       name: customerName,
       phone: customerPhone,
       totalProducts: historyItems.length,
-      totalUnits: historyItems.reduce((sum, it) => sum + it.qty, 0)
+      totalUnits: historyItems.reduce((sum, it) => sum + it.qty, 0),
+      totalMonto: totalPedido
     };
 
     // Guarda el pedido en la base de datos para los reportes (Supabase).
@@ -327,7 +342,7 @@ function sendToSeller(key) {
   const phone = sellerPhoneDigits(seller.phone);
   if (phone.length < 8) return;
   const s = lastOrderSummary;
-  const message = `Buenas, mi nombre es ${s.name || ''}, este es mi pedido del catálogo infantil.`;
+  const message = `Buenas, mi nombre es ${s.name || ''}, este es mi pedido del catálogo infantil${s.totalMonto ? ` (total ${colones(s.totalMonto)})` : ''}.`;
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank', 'noopener');
   closeSellerModal();

@@ -23,6 +23,17 @@ Link: `https://impohogar.github.io/catalogo-ni-ios/`
 Para agregar un artículo nuevo a este catálogo basta con cargarlo en el
 panel administrativo del catálogo de perfumería con género **Niños**.
 
+## Precios
+
+- Todo el catálogo a **costo + 30%**, redondeado hacia arriba a múltiplos
+  de ₡50 (costos de Interakzion, tabla01 → PCOSTO, del 18/11/2026).
+- Están en `js/precios.js` (por código de barras). Solo se publica el
+  precio final, nunca el costo. Un artículo que no esté en la lista sale
+  como "Precio: consultar".
+- El precio sale en cada tarjeta, en la ficha, en "Mi pedido", en la barra
+  de abajo (total) y en el Excel (precio unitario, subtotal y total). El
+  mensaje de WhatsApp también lleva el total.
+
 ## Pedidos y vendedores
 
 - Las vendedoras son las del catálogo de bodega (Nevada): Ingrid, Jennifer,

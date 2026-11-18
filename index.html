@@ -20,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Jost:wght@400;500;600&family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css?v=20261114a">
 <!-- Colores y tipografia del catalogo infantil: se carga AL FINAL -->
-<link rel="stylesheet" href="css/ninos.css?v=20261114c">
+<link rel="stylesheet" href="css/ninos.css?v=20261118a">
 </head>
 <body>
 <noscript>
@@ -195,7 +195,7 @@
 <!-- ============ BARRA DEL PEDIDO (fija abajo) ============ -->
 <div id="orderBar">
   <div class="order-bar-main">
-    <div class="summary"><span class="summary-item"><b id="selCount">0</b> <span class="summary-lbl">Productos seleccionados</span></span><span class="summary-sep" aria-hidden="true"></span><span class="summary-item"><b id="selUnits">0</b> <span class="summary-lbl">Unidades totales</span></span></div>
+    <div class="summary"><span class="summary-item"><b id="selCount">0</b> <span class="summary-lbl">Productos seleccionados</span></span><span class="summary-sep" aria-hidden="true"></span><span class="summary-item"><b id="selUnits">0</b> <span class="summary-lbl">Unidades totales</span></span><span class="summary-sep" aria-hidden="true"></span><span class="summary-item summary-total"><b id="selTotal">₡0</b> <span class="summary-lbl">Total</span></span></div>
     <span id="status" role="status"></span>
     <button id="genBtn" type="button" disabled>Generar pedido (Excel)</button>
   </div>
@@ -268,7 +268,7 @@
     </div>
     <div class="order-list" id="orderList"></div>
     <div class="order-footer">
-      <div class="of-total"><b id="orderModalCount">0</b> productos &nbsp;·&nbsp; <b id="orderModalUnits">0</b> unidades</div>
+      <div class="of-total"><b id="orderModalCount">0</b> productos &nbsp;·&nbsp; <b id="orderModalUnits">0</b> unidades &nbsp;·&nbsp; Total <b id="orderModalTotal">₡0</b></div>
       <button type="button" onclick="closeOrderReview()">Seguir viendo el catálogo</button>
     </div>
   </div>
@@ -352,17 +352,18 @@
 
 <!-- El ORDEN de estos archivos importa: no los reordenes. -->
 <script defer src="js/config.js?v=20261114c"></script>
+<script defer src="js/precios.js?v=20261118a"></script>
 <script defer src="js/data.js?v=20261114b"></script>
 <script defer src="js/products-loader.js?v=20261114c"></script>
 <script defer src="js/utils.js?v=20261114b"></script>
 <script defer src="js/dupes.js?v=20261114b"></script>
-<script defer src="js/catalog.js?v=20261114b"></script>
-<script defer src="js/cart.js?v=20261114b"></script>
+<script defer src="js/catalog.js?v=20261118a"></script>
+<script defer src="js/cart.js?v=20261118a"></script>
 <script defer src="js/theme.js?v=20261114b"></script>
-<script defer src="js/order.js?v=20261114c"></script>
+<script defer src="js/order.js?v=20261118a"></script>
 <script defer src="js/history.js?v=20261114b"></script>
 <script defer src="js/calculator.js?v=20261114b"></script>
-<script defer src="js/lightbox.js?v=20261114b"></script>
+<script defer src="js/lightbox.js?v=20261118a"></script>
 <script defer src="js/inicio.js?v=20261114b"></script>
 <script defer src="js/feedback.js?v=20261114b"></script>
 <script defer src="js/main.js?v=20261114c"></script>

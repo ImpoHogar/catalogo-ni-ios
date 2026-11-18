@@ -454,3 +454,23 @@ body.dark .brand-tag { color: var(--cat); }
 @media (prefers-reduced-motion: reduce) {
   .brand-marquee { transform: none; }
 }
+
+/* ---------- Precios ---------- */
+.price { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 10px; }
+.price b {
+  font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1;
+  color: var(--k-blue); letter-spacing: -.01em;
+}
+body.dark .price b { color: var(--k-sun); }
+.price small { font-size: 12px; font-weight: 800; color: var(--muted); }
+.price.is-ask b { font-family: var(--font-ui); font-size: 13px; font-weight: 800; color: var(--muted); }
+.oi-price { margin-top: 3px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.oi-price b { color: var(--k-blue); font-weight: 800; }
+body.dark .oi-price b { color: var(--k-sun); }
+.summary-total b { color: var(--k-pink-700); }
+body.dark .summary-total b { color: var(--gold); }
+.of-total b#orderModalTotal { color: var(--k-pink-700); }
+.lb-price { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--k-blue); }
+body.dark .lb-price { color: var(--k-sun); }
+#orderBar .summary .summary-total b { color: var(--k-pink-700); }
+body.dark #orderBar .summary .summary-total b { color: var(--gold); }

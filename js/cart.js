@@ -51,6 +51,8 @@ function updateOrderBar() {
   const units = ids.reduce((sum, id) => sum + qtyMap[id], 0);
   document.getElementById('selCount').textContent = ids.length;
   document.getElementById('selUnits').textContent = units;
+  const tot = document.getElementById('selTotal');
+  if (tot) tot.textContent = colones(totalCarrito());
   document.getElementById('genBtn').disabled = ids.length === 0;
 
   const badge = document.getElementById('reviewBadge');
@@ -89,6 +91,7 @@ function renderOrderReview() {
           <div class="oi-info">
             <div class="oi-name">${escapeHtml(p.name)}</div>
             <div class="oi-code">${escapeHtml(p.code)}</div>
+            <div class="oi-price">${precioDe(p) ? `${colones(precioDe(p))} c/u · <b>${colones(precioDe(p) * qtyMap[id])}</b>` : 'Precio: consultar'}</div>
           </div>
           <div class="oi-qty">
             <button type="button" onclick="changeQty(${p.id},-1)">−</button>
@@ -102,4 +105,5 @@ function renderOrderReview() {
   const units = ids.reduce((sum, id) => sum + qtyMap[id], 0);
   document.getElementById('orderModalCount').textContent = ids.length;
   document.getElementById('orderModalUnits').textContent = units;
+  document.getElementById('orderModalTotal').textContent = colones(totalCarrito());
 }

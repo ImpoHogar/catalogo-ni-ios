@@ -222,6 +222,14 @@ function clearTipoGenero() {
 //  Orden visual: foto -> marca + stock -> nombre -> notas ->
 //  dupe/inspiracion -> codigo de barras -> cantidad a pedir.
 // ============================================================
+// Precio de la tarjeta (ver js/precios.js).
+function precioHTML(p) {
+  const pr = precioDe(p);
+  return pr
+    ? `<div class="price"><b>${colones(pr)}</b><small>c/u</small></div>`
+    : `<div class="price is-ask"><b>Precio: consultar</b></div>`;
+}
+
 function cardHTML(p) {
   const safeName = escapeHtml(p.name);
   const safeCode = escapeHtml(p.code);
@@ -257,6 +265,7 @@ function cardHTML(p) {
       <div class="info">
         <div class="meta"><span class="brand-tag">${escapeHtml(categoriaNinos(p))}</span><span class="stock${agotado ? ' is-out' : ''}">${stockLabel}</span></div>
         <h3 class="name" title="${safeName}">${escapeHtml(nombreBonito(p))}</h3>
+        ${precioHTML(p)}
         ${notas}
         ${dupePanelHTML(p.id)}
         <div class="barcode-strip" onclick="openLightbox(${p.id}, 1)" title="Ver código de barras en grande"><svg class="bc-svg" id="bc-${p.id}" data-code="${safeCode}" role="img" aria-label="Código de barras ${safeCode}"></svg></div>

@@ -102,6 +102,7 @@ function renderLightboxInfo(p) {
     <p class="lb-realname">${escapeHtml(p.name)}</p>
     ${tags.length ? `<div class="lb-tags">${tags.join('')}</div>` : ''}
     <dl class="lb-facts">
+      <div class="lb-fact"><dt>Precio</dt><dd><span class="lb-price">${precioDe(p) ? colones(precioDe(p)) + ' c/u' : 'Consultar'}</span></dd></div>
       <div class="lb-fact"><dt>Disponibilidad</dt><dd><span class="stock${agotado ? ' is-out' : ''}">${agotado ? 'Agotado' : escapeHtml(p.stock) + ' uds'}</span></dd></div>
       <div class="lb-fact"><dt>Código</dt><dd class="code">${escapeHtml(p.code)}</dd></div>
     </dl>

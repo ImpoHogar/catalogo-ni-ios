@@ -10,6 +10,7 @@
 //  con su costo + 30%.
 //  Estuches: los que quedaban por debajo de 7.500 van a 7.500 fijo; los
 //  que pasan de 7.500 se quedan con su costo + 30%.
+//  Splash: 1.300 fijo.
 //  Costos tomados de Interakzion perfumeria (tabla01, campo PCOSTO)
 //  el 18/11/2026. Aqui solo se publica el PRECIO final: el costo no
 //  aparece en ninguna parte del catalogo.
@@ -58,9 +59,9 @@ const PRECIOS = {
   "847610028693": 4500,   // PRF-MARVEL 100ML AVENGERS HULK & THOR
   "847610042224": 4500,   // PRF-MGA 100ML LOL ESTILOS
   "847610040299": 4500,   // PRF-MGA 100ML LOL FIESTA
-  "7453130921012": 1000,   // SPLASH DISNEY ARIEL 100ML
-  "7453130900345": 1000,   // SPLASH DISNEY INSIDE OUT 100ML
-  "7453130921029": 950,   // SPLASH DISNEY MOANA 100ML
+  "7453130921012": 1300,   // SPLASH DISNEY ARIEL 100ML
+  "7453130900345": 1300,   // SPLASH DISNEY INSIDE OUT 100ML
+  "7453130921029": 1300,   // SPLASH DISNEY MOANA 100ML
   "8436603330800": 19050,   // EST BABY EDC 3PZA
   "8436603332606": 19050,   // EST TOUS BABY BOLSO
   "8436603330824": 17650,   // EST TOUS KIDS 2P+B
